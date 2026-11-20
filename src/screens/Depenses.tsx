@@ -5,6 +5,7 @@ import { euros } from '../lib/format';
 import { Avatar, Empty, Icon, TxGroups, signed } from '../components/ui';
 import type { DepFilter, ScreenProps } from '../App';
 import type { Person } from '../lib/types';
+import { L, P } from '../lib/i18n';
 
 const norm = (s: string) =>
   s
@@ -61,17 +62,17 @@ export default function Depenses({ data, nav }: ScreenProps) {
     <div className="fade-in">
       <div className="stats3">
         <div className="stat">
-          <div className="k">Dépensé</div>
+          <div className="k">{L('Dépensé', 'Spent')}</div>
           <div className="v num">{euros(spent)}</div>
         </div>
         <div className="stat">
-          <div className="k">Rentrées</div>
+          <div className="k">{L('Rentrées', 'Extra income')}</div>
           <div className="v num" style={{ color: 'var(--income)' }}>
             +{euros(inc)}
           </div>
         </div>
         <div className="stat">
-          <div className="k">Opérations</div>
+          <div className="k">{L('Opérations', 'Transactions')}</div>
           <div className="v num">{monthTxs.length}</div>
         </div>
       </div>
@@ -80,24 +81,24 @@ export default function Depenses({ data, nav }: ScreenProps) {
         <span className="muted">
           <Icon name="search" />
         </span>
-        <span className="sr">Rechercher</span>
-        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher : Leclerc, resto, Vinted…" enterKeyHint="search" />
+        <span className="sr">{L('Rechercher', 'Search')}</span>
+        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={L('Rechercher : Leclerc, resto, Vinted…', 'Search: Tesco, restaurant, eBay…')} enterKeyHint="search" />
         {q && (
-          <button onClick={() => setQ('')} aria-label="Effacer la recherche" className="muted">
+          <button onClick={() => setQ('')} aria-label={L('Effacer la recherche', 'Clear search')} className="muted">
             <Icon name="close" size={18} />
           </button>
         )}
       </label>
 
-      <div className="chips" role="group" aria-label="Filtres">
+      <div className="chips" role="group" aria-label={L('Filtres', 'Filters')}>
         <button className={`chip${all ? ' on' : ''}`} onClick={() => setF({})}>
-          Tout
+          {L('Tout', 'All')}
         </button>
         <button className={`chip${f.kind === 'expense' ? ' on' : ''}`} onClick={() => toggle({ kind: 'expense' })}>
-          💸 Dépenses
+          💸 {L('Dépenses', 'Expenses')}
         </button>
         <button className={`chip${f.kind === 'income' ? ' on' : ''}`} onClick={() => toggle({ kind: 'income' })}>
-          💰 Rentrées
+          💰 {L('Rentrées', 'Income')}
         </button>
         {([1, 2] as Person[]).map((p) => (
           <button key={p} className={`chip${f.person === p ? ' on' : ''}`} onClick={() => toggle({ person: p })}>
@@ -105,7 +106,7 @@ export default function Depenses({ data, nav }: ScreenProps) {
           </button>
         ))}
       </div>
-      <div className="chips" role="group" aria-label="Filtrer par catégorie">
+      <div className="chips" role="group" aria-label={L('Filtrer par catégorie', 'Filter by category')}>
         {f.kind !== 'income' &&
           envChips.map((e) => (
             <button key={e.id} className={`chip${f.cat === e.id ? ' on' : ''}`} onClick={() => toggle({ cat: e.id })}>
@@ -122,15 +123,15 @@ export default function Depenses({ data, nav }: ScreenProps) {
 
       <div className="listbar">
         <span className="num">
-          <b>{list.length}</b> opération{list.length > 1 ? 's' : ''} · <b>{euros(net, { decimals: true, sign: true })}</b>
+          <b>{list.length}</b> {P(list.length, 'opération', 'transaction')} · <b>{euros(net, { decimals: true, sign: true })}</b>
         </span>
         <button className="link" onClick={() => setByAmount(!byAmount)}>
-          Trier : {byAmount ? 'plus gros montants' : 'plus récentes'}
+          {L('Trier : ', 'Sort: ')}{byAmount ? L('plus gros montants', 'largest amounts') : L('plus récentes', 'most recent')}
         </button>
       </div>
 
       {list.length === 0 ? (
-        <Empty emoji="🔍">{monthTxs.length === 0 ? 'Aucune opération ce mois-ci.' : 'Aucune opération ne correspond.'}</Empty>
+        <Empty emoji="🔍">{monthTxs.length === 0 ? L('Aucune opération ce mois-ci.', 'No transactions this month.') : L('Aucune opération ne correspond.', 'No matching transactions.')}</Empty>
       ) : (
         <TxGroups txs={list} settings={settings} onOpen={nav.openEdit} today={nav.today} sortByAmount={byAmount} />
       )}

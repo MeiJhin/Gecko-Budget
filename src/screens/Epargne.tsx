@@ -5,6 +5,7 @@ import { GoldArea } from '../components/charts';
 import { Empty, Icon, Ico, TxRow } from '../components/ui';
 import type { ScreenProps } from '../App';
 import type { Tx } from '../lib/types';
+import { L } from '../lib/i18n';
 
 export default function Epargne({ data, nav }: ScreenProps) {
   const { settings, txs } = data;
@@ -28,45 +29,45 @@ export default function Epargne({ data, nav }: ScreenProps) {
 
   return (
     <div className="fade-in">
-      <section className="savehero" aria-label="Notre épargne">
-        <div style={{ opacity: 0.85 }}>{isCurrent || !upTo ? 'Notre épargne' : `Notre épargne fin ${monthName(nav.month)}`}</div>
+      <section className="savehero" aria-label={L('Notre épargne', 'Our savings')}>
+        <div style={{ opacity: 0.85 }}>{isCurrent || !upTo ? L('Notre épargne', 'Our savings') : L(`Notre épargne fin ${monthName(nav.month)}`, `Our savings at the end of ${monthName(nav.month)}`)}</div>
         <div className="big num">{euros(totalNow)}</div>
         <div className="delta num" style={{ opacity: 0.92 }}>
           {flow.in === 0 && flow.out === 0 ? (
-            <>{isCurrent ? 'Ce mois-ci' : `En ${monthName(nav.month)}`} : pas encore de mouvement</>
+            <>{isCurrent ? L('Ce mois-ci', 'This month') : L(`En ${monthName(nav.month)}`, `In ${monthName(nav.month)}`)}{L(' : pas encore de mouvement', ': no movement yet')}</>
           ) : (
             <>
-              {isCurrent ? 'Ce mois-ci' : `En ${monthName(nav.month)}`} : <b>{euros(flow.in - flow.out, { sign: true })}</b>
+              {isCurrent ? L('Ce mois-ci', 'This month') : L(`En ${monthName(nav.month)}`, `In ${monthName(nav.month)}`)}{L(' : ', ': ')}<b>{euros(flow.in - flow.out, { sign: true })}</b>
               <span className="small" style={{ opacity: 0.8 }}>
                 {' '}
-                (versé {euros(flow.in)}
-                {flow.out > 0 && <> · retiré {euros(flow.out)}</>})
+                ({L('versé', 'in')} {euros(flow.in)}
+                {flow.out > 0 && <> · {L('retiré', 'out')} {euros(flow.out)}</>})
               </span>
             </>
           )}
         </div>
         <div style={{ marginTop: 14 }}>
-          <GoldArea points={series.map((p) => p.total)} firstLabel={monthName(series[0].month)} lastLabel={isCurrent ? "aujourd'hui" : monthName(nav.month)} />
+          <GoldArea points={series.map((p) => p.total)} firstLabel={monthName(series[0].month)} lastLabel={isCurrent ? L("aujourd'hui", 'today') : monthName(nav.month)} />
         </div>
       </section>
 
       <div className="btn2">
         <button className="btn-gold" onClick={() => nav.openAdd({ kind: 'saving', dir: 1, pot: potFilter ?? undefined })}>
-          ＋ Mettre de côté
+          ＋ {L('Mettre de côté', 'Put aside')}
         </button>
         <button className="btn-soft" onClick={() => nav.openAdd({ kind: 'saving', dir: -1, pot: potFilter ?? undefined })}>
-          − Retirer
+          − {L('Retirer', 'Withdraw')}
         </button>
       </div>
 
       <div className="section-head">
-        <h2>Nos cagnottes</h2>
+        <h2>{L('Nos cagnottes', 'Our savings pots')}</h2>
         <button className="link" onClick={nav.openSettings}>
-          Gérer
+          {L('Gérer', 'Manage')}
         </button>
       </div>
       {pots.length === 0 ? (
-        <Empty emoji="🐷">Aucune cagnotte : créez-en une dans les réglages (Livret A, Vacances, Voiture…).</Empty>
+        <Empty emoji="🐷">{L('Aucune cagnotte : créez-en une dans les réglages (Livret A, Vacances, Voiture…).', 'No savings pots: create one in the settings (savings account, holidays, car…).')}</Empty>
       ) : (
         pots.map((p) => {
           const bal = potBalance(p, txs, upTo);
@@ -84,11 +85,11 @@ export default function Epargne({ data, nav }: ScreenProps) {
                       <b className="grow-x" style={{ width: `${ratio * 100}%` }} />
                     </span>
                     <span className="small muted num" style={{ display: 'block', marginTop: 6 }}>
-                      {Math.round((bal / p.goal) * 100)} % de l'objectif · {euros(p.goal)}
+                      {L(`${Math.round((bal / p.goal) * 100)} % de l'objectif`, `${Math.round((bal / p.goal) * 100)}% of the goal`)} · {euros(p.goal)}
                     </span>
                   </>
                 ) : (
-                  <span className="small muted">Pas d'objectif fixé</span>
+                  <span className="small muted">{L("Pas d'objectif fixé", 'No goal set')}</span>
                 )}
               </span>
               <span className="bal num">{euros(bal)}</span>
@@ -98,15 +99,15 @@ export default function Epargne({ data, nav }: ScreenProps) {
       )}
 
       <div className="section-head">
-        <h2>Mouvements</h2>
+        <h2>{L('Mouvements', 'Movements')}</h2>
         {filtered && (
-          <button className="filter-tag" onClick={() => setPotFilter(null)} aria-label={`Retirer le filtre ${filtered.name}`}>
+          <button className="filter-tag" onClick={() => setPotFilter(null)} aria-label={L(`Retirer le filtre ${filtered.name}`, `Remove filter ${filtered.name}`)}>
             {filtered.name} <Icon name="close" size={16} />
           </button>
         )}
       </div>
       {byMonth.length === 0 ? (
-        <Empty emoji="🪙">Aucun mouvement pour l'instant. Touchez « Mettre de côté » pour commencer.</Empty>
+        <Empty emoji="🪙">{L("Aucun mouvement pour l'instant. Touchez « Mettre de côté » pour commencer.", 'No movements yet. Tap “Put aside” to start.')}</Empty>
       ) : (
         <div className="card">
           {byMonth.map((g) => (

@@ -9,6 +9,7 @@ import { isDemo } from '../lib/supabase';
 import { frError, householdInfo, leaveEmptyHousehold, signOut } from '../lib/auth';
 import IconPicker from './IconPicker';
 import { Icon, Sheet, useToast } from './ui';
+import { L, setLang, useLang, type Lang } from '../lib/i18n';
 
 export type ThemeChoice = 'auto' | 'light' | 'dark';
 
@@ -59,6 +60,7 @@ export default function SettingsSheet({
   const [infoErr, setInfoErr] = useState<string | null>(null);
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const lang = useLang();
 
   useEffect(() => {
     if (isDemo || !householdId) return;
@@ -74,20 +76,20 @@ export default function SettingsSheet({
 
   const save = () => {
     store.saveSettings(fromDraft(settings, d, month));
-    toast('Réglages enregistrés ✓');
+    toast(L('Réglages enregistrés ✓', 'Settings saved ✓'));
     setDone(true);
   };
 
   const pickRow = pick ? (d[pick.list] as { id: string; name: string; icon: string; color: string }[]).find((r) => r.id === pick.id) : null;
 
-  const exportCsv = () => saveFile(`gecko-budget-operations-${todayKey()}.csv`, toCsv(settings, txs), 'text/csv;charset=utf-8');
-  const exportJson = () => saveFile(`gecko-budget-sauvegarde-${todayKey()}.json`, toBackup(settings, txs), 'application/json');
+  const exportCsv = () => saveFile(`gecko-budget-${L('operations', 'transactions')}-${todayKey()}.csv`, toCsv(settings, txs), 'text/csv;charset=utf-8');
+  const exportJson = () => saveFile(`gecko-budget-${L('sauvegarde', 'backup')}-${todayKey()}.json`, toBackup(settings, txs), 'application/json');
   const importJson = async (f: File) => {
     try {
       const { settings: s, txs: t } = parseBackup(await f.text());
-      if (!window.confirm(`Restaurer cette sauvegarde ?\n\n${t.length} opérations seront ajoutées (ou remises à jour), et les réglages remplacés.`)) return;
+      if (!window.confirm(L(`Restaurer cette sauvegarde ?\n\n${t.length} opérations seront ajoutées (ou remises à jour), et les réglages remplacés.`, `Restore this backup?\n\n${t.length} transactions will be added (or updated), and the settings replaced.`))) return;
       store.importData(s, t);
-      setImportMsg(`Sauvegarde restaurée : ${t.length} opérations.`);
+      setImportMsg(L(`Sauvegarde restaurée : ${t.length} opérations.`, `Backup restored: ${t.length} transactions.`));
       setD(toDraft(s, month));
     } catch (e) {
       setImportMsg((e as Error).message);
@@ -95,12 +97,12 @@ export default function SettingsSheet({
   };
 
   return (
-    <Sheet title="Notre budget" onClose={onClose} closeSignal={done} footer={<button className="btn" onClick={save}>Enregistrer</button>}>
+    <Sheet title={L('Notre budget', 'Our budget')} onClose={onClose} closeSignal={done} footer={<button className="btn" onClick={save}>{L('Enregistrer', 'Save')}</button>}>
       <div className="grid2">
         {[0, 1].map((i) => (
           <div key={i}>
             <label className="label" htmlFor={`name${i}`}>
-              Prénom {i + 1}
+              {L('Prénom', 'First name')} {i + 1}
             </label>
             <input
               id={`name${i}`}
@@ -119,50 +121,55 @@ export default function SettingsSheet({
       </div>
 
       <label className="label" htmlFor="income">
-        Revenus du foyer par mois (€)
+        {L('Revenus du foyer par mois (€)', 'Household income per month (€)')}
       </label>
-      <MoneyInput label="Revenus du foyer par mois" value={d.income} onChange={(c) => setD({ ...d, income: c })} placeholder="ex. 3800" />
+      <MoneyInput label={L('Revenus du foyer par mois', 'Household income per month')} value={d.income} onChange={(c) => setD({ ...d, income: c })} placeholder={L('ex. 3800', 'e.g. 3800')} />
       <p className="help" style={{ marginTop: 8 }}>
-        Salaires et revenus réguliers, nets. Les montants s'appliquent à partir de {monthLabel(month, false)} : les mois passés ne changent pas.
+        {L(
+          `Salaires et revenus réguliers, nets. Les montants s'appliquent à partir de ${monthLabel(month, false)} : les mois passés ne changent pas.`,
+          `Regular take-home pay and income. Amounts apply from ${monthLabel(month, false)} onwards: past months don't change.`,
+        )}
       </p>
 
       {/* ---------- charges fixes ---------- */}
-      <span className="label">Charges fixes</span>
+      <span className="label">{L('Charges fixes', 'Fixed bills')}</span>
       <p className="help">
-        Ce qui part tout seul chaque mois : loyer, crédit, assurances, abonnements… L'icône se choisit toute seule d'après le nom, touchez-la pour la changer. « Jour » = date du
-        prélèvement.
+        {L(
+          "Ce qui part tout seul chaque mois : loyer, crédit, assurances, abonnements… L'icône se choisit toute seule d'après le nom, touchez-la pour la changer. « Jour » = date du prélèvement.",
+          'What goes out automatically each month: rent, loans, insurance, subscriptions… The icon is picked from the name; tap it to change it. “Day” = payment date.',
+        )}
       </p>
       {d.charges.length > 0 && (
         <div className="cols">
-          <span style={{ width: 50 }}>Icône</span>
-          <span className="grow">Nom</span>
-          <span style={{ width: 80, textAlign: 'right' }}>Montant</span>
-          <span style={{ width: 62 + 28 + 6, paddingLeft: 10 }}>Jour</span>
+          <span style={{ width: 50 }}>{L('Icône', 'Icon')}</span>
+          <span className="grow">{L('Nom', 'Name')}</span>
+          <span style={{ width: 80, textAlign: 'right' }}>{L('Montant', 'Amount')}</span>
+          <span style={{ width: 62 + 28 + 6, paddingLeft: 10 }}>{L('Jour', 'Day')}</span>
         </div>
       )}
       {d.charges.map((c) => (
         <div className="setrow" key={c.id}>
-          <button className="icobtn" style={{ '--c': c.color } as CSSProperties} onClick={() => setPick({ list: 'charges', id: c.id })} aria-label={`Changer l'icône de ${c.name || 'cette charge'}`}>
+          <button className="icobtn" style={{ '--c': c.color } as CSSProperties} onClick={() => setPick({ list: 'charges', id: c.id })} aria-label={L(`Changer l'icône de ${c.name || 'cette charge'}`, `Change the icon of ${c.name || 'this bill'}`)}>
             {c.icon}
           </button>
           <input
             className="field grow"
             value={c.name}
-            placeholder="ex. Loyer"
-            aria-label="Nom de la charge"
+            placeholder={L('ex. Loyer', 'e.g. Rent')}
+            aria-label={L('Nom de la charge', 'Bill name')}
             onChange={(e) => {
               const name = e.target.value;
               upd('charges', c.id, c.iconAuto ? { name, icon: guessIcon(name) ?? '🧾' } : { name });
             }}
           />
           <div style={{ width: 80, flex: 'none' }}>
-            <MoneyInput label="Montant par mois" value={c.amount} onChange={(v) => upd('charges', c.id, { amount: v })} placeholder="€" />
+            <MoneyInput label={L('Montant par mois', 'Amount per month')} value={c.amount} onChange={(v) => upd('charges', c.id, { amount: v })} placeholder="€" />
           </div>
           <label className="daybox">
-            le
+            {L('le', 'on')}
             <input
               inputMode="numeric"
-              aria-label="Jour du prélèvement"
+              aria-label={L('Jour du prélèvement', 'Payment day')}
               placeholder="–"
               value={c.day ?? ''}
               onChange={(e) => {
@@ -171,82 +178,99 @@ export default function SettingsSheet({
               }}
             />
           </label>
-          <button className="x" onClick={() => del('charges', c.id)} aria-label={`Supprimer ${c.name || 'cette charge'}`}>
+          <button className="x" onClick={() => del('charges', c.id)} aria-label={L(`Supprimer ${c.name || 'cette charge'}`, `Delete ${c.name || 'this bill'}`)}>
             <Icon name="close" />
           </button>
         </div>
       ))}
       <button className="dashed" onClick={() => setD({ ...d, charges: [...d.charges, { id: uid(), name: '', icon: '🧾', color: nextColor(d.charges.length + 2), iconAuto: true, day: null, amount: 0 }] })}>
-        + Ajouter une charge fixe
+        {L('+ Ajouter une charge fixe', '+ Add a fixed bill')}
       </button>
 
       {/* ---------- enveloppes ---------- */}
       <span className="label" style={{ marginTop: 28 }}>
-        Enveloppes du quotidien
+        {L('Enveloppes du quotidien', 'Everyday envelopes')}
       </span>
-      <p className="help">Ce qu'on s'autorise à dépenser par mois. Touchez l'icône pour la changer, ainsi que sa couleur.</p>
+      <p className="help">{L("Ce qu'on s'autorise à dépenser par mois. Touchez l'icône pour la changer, ainsi que sa couleur.", 'What we allow ourselves to spend each month. Tap the icon to change it and its colour.')}</p>
       {d.envelopes.map((e) => (
         <div className="setrow" key={e.id}>
-          <button className="icobtn" style={{ '--c': e.color } as CSSProperties} onClick={() => setPick({ list: 'envelopes', id: e.id })} aria-label={`Changer l'icône de ${e.name || 'cette enveloppe'}`}>
+          <button className="icobtn" style={{ '--c': e.color } as CSSProperties} onClick={() => setPick({ list: 'envelopes', id: e.id })} aria-label={L(`Changer l'icône de ${e.name || 'cette enveloppe'}`, `Change the icon of ${e.name || 'this envelope'}`)}>
             {e.icon}
           </button>
-          <input className="field grow" value={e.name} placeholder="ex. Courses" aria-label="Nom de l'enveloppe" onChange={(ev) => upd('envelopes', e.id, { name: ev.target.value })} />
+          <input className="field grow" value={e.name} placeholder={L('ex. Courses', 'e.g. Groceries')} aria-label={L("Nom de l'enveloppe", 'Envelope name')} onChange={(ev) => upd('envelopes', e.id, { name: ev.target.value })} />
           <div style={{ width: 104, flex: 'none' }}>
-            <MoneyInput label={`Budget mensuel ${e.name}`} value={e.budget} onChange={(v) => upd('envelopes', e.id, { budget: v })} placeholder="€/mois" />
+            <MoneyInput label={L(`Budget mensuel ${e.name}`, `Monthly budget ${e.name}`)} value={e.budget} onChange={(v) => upd('envelopes', e.id, { budget: v })} placeholder={L('€/mois', '€/month')} />
           </div>
-          <button className="x" onClick={() => del('envelopes', e.id)} aria-label={`Supprimer ${e.name || 'cette enveloppe'}`}>
+          <button className="x" onClick={() => del('envelopes', e.id)} aria-label={L(`Supprimer ${e.name || 'cette enveloppe'}`, `Delete ${e.name || 'this envelope'}`)}>
             <Icon name="close" />
           </button>
         </div>
       ))}
       <button className="dashed" onClick={() => setD({ ...d, envelopes: [...d.envelopes, { id: uid(), name: '', icon: '📦', color: nextColor(d.envelopes.length), budget: 0 }] })}>
-        + Ajouter une enveloppe
+        {L('+ Ajouter une enveloppe', '+ Add an envelope')}
       </button>
 
       {/* ---------- cagnottes ---------- */}
       <span className="label" style={{ marginTop: 28 }}>
-        Cagnottes d'épargne
+        {L("Cagnottes d'épargne", 'Savings pots')}
       </span>
-      <p className="help">Livret A, vacances, voiture… « Objectif » est facultatif. « Déjà » = ce qu'il y a dessus aujourd'hui.</p>
+      <p className="help">{L("Livret A, vacances, voiture… « Objectif » est facultatif. « Déjà » = ce qu'il y a dessus aujourd'hui.", 'Savings account, holidays, car… “Goal” is optional. “Now” = what is in it today.')}</p>
       {d.pots.length > 0 && (
         <div className="cols">
-          <span style={{ width: 50 }}>Icône</span>
-          <span className="grow">Nom</span>
-          <span style={{ width: 76, textAlign: 'center' }}>Objectif</span>
-          <span style={{ width: 76 + 28 + 6, paddingLeft: 26 }}>Déjà</span>
+          <span style={{ width: 50 }}>{L('Icône', 'Icon')}</span>
+          <span className="grow">{L('Nom', 'Name')}</span>
+          <span style={{ width: 76, textAlign: 'center' }}>{L('Objectif', 'Goal')}</span>
+          <span style={{ width: 76 + 28 + 6, paddingLeft: 26 }}>{L('Déjà', 'Now')}</span>
         </div>
       )}
       {d.pots.map((p) => (
         <div className="setrow" key={p.id}>
-          <button className="icobtn" style={{ '--c': p.color } as CSSProperties} onClick={() => setPick({ list: 'pots', id: p.id })} aria-label={`Changer l'icône de ${p.name || 'cette cagnotte'}`}>
+          <button className="icobtn" style={{ '--c': p.color } as CSSProperties} onClick={() => setPick({ list: 'pots', id: p.id })} aria-label={L(`Changer l'icône de ${p.name || 'cette cagnotte'}`, `Change the icon of ${p.name || 'this pot'}`)}>
             {p.icon}
           </button>
-          <input className="field grow" value={p.name} placeholder="ex. Vacances" aria-label="Nom de la cagnotte" onChange={(ev) => upd('pots', p.id, { name: ev.target.value })} />
+          <input className="field grow" value={p.name} placeholder={L('ex. Vacances', 'e.g. Holidays')} aria-label={L('Nom de la cagnotte', 'Pot name')} onChange={(ev) => upd('pots', p.id, { name: ev.target.value })} />
           <div style={{ width: 76, flex: 'none' }}>
-            <MoneyInput label="Objectif" value={p.goal ?? 0} onChange={(v) => upd('pots', p.id, { goal: v > 0 ? v : null })} placeholder="–" />
+            <MoneyInput label={L('Objectif', 'Goal')} value={p.goal ?? 0} onChange={(v) => upd('pots', p.id, { goal: v > 0 ? v : null })} placeholder="–" />
           </div>
           <div style={{ width: 76, flex: 'none' }}>
-            <MoneyInput label="Déjà sur la cagnotte" value={p.initial} onChange={(v) => upd('pots', p.id, { initial: v })} placeholder="0" />
+            <MoneyInput label={L('Déjà sur la cagnotte', 'Already in the pot')} value={p.initial} onChange={(v) => upd('pots', p.id, { initial: v })} placeholder="0" />
           </div>
-          <button className="x" onClick={() => del('pots', p.id)} aria-label={`Supprimer ${p.name || 'cette cagnotte'}`}>
+          <button className="x" onClick={() => del('pots', p.id)} aria-label={L(`Supprimer ${p.name || 'cette cagnotte'}`, `Delete ${p.name || 'this pot'}`)}>
             <Icon name="close" />
           </button>
         </div>
       ))}
       <button className="dashed" onClick={() => setD({ ...d, pots: [...d.pots, { id: uid(), name: '', icon: '🐷', color: nextColor(d.pots.length + 7), goal: null, initial: 0 }] })}>
-        + Ajouter une cagnotte
+        {L('+ Ajouter une cagnotte', '+ Add a savings pot')}
       </button>
+
+      {/* ---------- langue ---------- */}
+      <span className="label" style={{ marginTop: 32 }}>
+        Langue · Language
+      </span>
+      <div className="grid2">
+        {(
+          [
+            ['fr', '🇫🇷 Français'],
+            ['en', '🇬🇧 English'],
+          ] as [Lang, string][]
+        ).map(([k, l]) => (
+          <button key={k} className={`mode${lang === k ? ' on' : ''}`} onClick={() => setLang(k)}>
+            {l}
+          </button>
+        ))}
+      </div>
 
       {/* ---------- apparence ---------- */}
       <span className="label" style={{ marginTop: 32 }}>
-        Apparence (sur ce téléphone)
+        {L('Apparence (sur ce téléphone)', 'Appearance (on this phone)')}
       </span>
       <div className="themes">
         {(
           [
             ['auto', 'Auto'],
-            ['light', '☀️ Clair'],
-            ['dark', '🌙 Sombre'],
+            ['light', L('☀️ Clair', '☀️ Light')],
+            ['dark', L('🌙 Sombre', '🌙 Dark')],
           ] as [ThemeChoice, string][]
         ).map(([k, l]) => (
           <button key={k} className={`mode${theme === k ? ' on' : ''}`} onClick={() => setTheme(k)}>
@@ -257,25 +281,29 @@ export default function SettingsSheet({
 
       {/* ---------- foyer ---------- */}
       <span className="label" style={{ marginTop: 32 }}>
-        Notre foyer
+        {L('Notre foyer', 'Our household')}
       </span>
       {isDemo ? (
         <p className="help">
-          <b>Mode démo</b> : les données restent sur cet appareil. Une fois Supabase branché (voir le guide), vous aurez chacun votre compte et un foyer partagé.
+          <b>{L('Mode démo', 'Demo mode')}</b>
+          {L(
+            ' : les données restent sur cet appareil. Une fois Supabase branché (voir le guide), vous aurez chacun votre compte et un foyer partagé.',
+            ': data stays on this device. Once Supabase is connected (see the guide), you will each have an account and a shared household.',
+          )}
         </p>
       ) : info ? (
         <>
           <p className="help">
             {info.members >= 2
-              ? 'Vous êtes deux dans ce foyer. Tout ce que l’un note apparaît chez l’autre.'
-              : 'Pour relier le 2ᵉ téléphone : créez un compte dessus, choisissez « Rejoindre un foyer » et tapez ce code :'}
+              ? L('Vous êtes deux dans ce foyer. Tout ce que l’un note apparaît chez l’autre.', 'There are two of you in this household. Whatever one records shows up for the other.')
+              : L('Pour relier le 2ᵉ téléphone : créez un compte dessus, choisissez « Rejoindre un foyer » et tapez ce code :', 'To link the 2nd phone: create an account on it, choose “Join a household” and type this code:')}
           </p>
           {info.members < 2 && <div className="code">{info.code}</div>}
           {info.members < 2 && txs.length === 0 && (
             <button
               className="textlink"
               onClick={async () => {
-                if (!window.confirm("Quitter ce foyer vide pour rejoindre celui de votre moitié avec son code ?")) return;
+                if (!window.confirm(L('Quitter ce foyer vide pour rejoindre celui de votre moitié avec son code ?', "Leave this empty household to join your partner's with their code?"))) return;
                 try {
                   await leaveEmptyHousehold();
                   store.clearLocal();
@@ -285,30 +313,30 @@ export default function SettingsSheet({
                 }
               }}
             >
-              Vous avez plutôt un code pour rejoindre l'autre foyer ?
+              {L("Vous avez plutôt un code pour rejoindre l'autre foyer ?", 'Have a code to join the other household instead?')}
             </button>
           )}
           {infoErr && <div className="error-msg">{infoErr}</div>}
         </>
       ) : (
-        <p className="help">{infoErr ?? 'Chargement…'}</p>
+        <p className="help">{infoErr ?? L('Chargement…', 'Loading…')}</p>
       )}
 
       {/* ---------- sauvegarde ---------- */}
       <span className="label" style={{ marginTop: 32 }}>
-        Export et sauvegarde
+        {L('Export et sauvegarde', 'Export & backup')}
       </span>
-      <p className="help">Le CSV s'ouvre dans Excel, Numbers ou Google Sheets. La sauvegarde (.json) contient tout et peut être restaurée ici.</p>
+      <p className="help">{L("Le CSV s'ouvre dans Excel, Numbers ou Google Sheets. La sauvegarde (.json) contient tout et peut être restaurée ici.", 'The CSV opens in Excel, Numbers or Google Sheets. The backup (.json) contains everything and can be restored here.')}</p>
       <div className="grid2">
         <button className="btn ghost small" onClick={exportCsv}>
           📄 Export CSV
         </button>
         <button className="btn ghost small" onClick={exportJson}>
-          💾 Sauvegarde
+          💾 {L('Sauvegarde', 'Backup')}
         </button>
       </div>
       <button className="btn ghost small" style={{ marginTop: 10 }} onClick={() => fileRef.current?.click()}>
-        ♻️ Restaurer une sauvegarde
+        ♻️ {L('Restaurer une sauvegarde', 'Restore a backup')}
       </button>
       <input
         ref={fileRef}
@@ -326,20 +354,20 @@ export default function SettingsSheet({
       {!isDemo && (
         <>
           <span className="label" style={{ marginTop: 32 }}>
-            Compte
+            {L('Compte', 'Account')}
           </span>
-          <p className="help">Connecté avec {email ?? 'votre e-mail'}.</p>
+          <p className="help">{L('Connecté avec', 'Signed in as')} {email ?? L('votre e-mail', 'your e-mail')}.</p>
           <button
             className="btn danger small"
             onClick={async () => {
-              if (!window.confirm('Se déconnecter de Gecko Budget sur ce téléphone ?')) return;
+              if (!window.confirm(L('Se déconnecter de Gecko Budget sur ce téléphone ?', 'Sign out of Gecko Budget on this phone?'))) return;
               store.clearLocal();
               store.close();
               await signOut();
               window.location.reload();
             }}
           >
-            Se déconnecter
+            {L('Se déconnecter', 'Sign out')}
           </button>
         </>
       )}

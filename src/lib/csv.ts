@@ -1,22 +1,24 @@
 import type { Settings, Tx } from './types';
 import { categoryOf } from './calc';
 import { frDate } from './format';
+import { L, getLang } from './i18n';
 import { normalizeSettings } from './settings';
 
-const cell = (v: string) => (/[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-const money = (c: number) => (c / 100).toFixed(2).replace('.', ',');
+const cell = (v: string, sep: string) => (new RegExp(`["${sep}\\n\\r]`).test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+const money = (c: number) => (getLang() === 'en' ? (c / 100).toFixed(2) : (c / 100).toFixed(2).replace('.', ','));
 
-/** CSV lisible par Excel / Numbers / Google Sheets en français (séparateur « ; », virgule décimale) */
+/** CSV lisible par Excel / Numbers / Google Sheets : en français « ; » et virgule décimale, en anglais « , » et point */
 export function toCsv(settings: Settings, txs: Tx[]): string {
-  const head = ['Date', 'Type', 'Catégorie', 'Montant (€)', 'Qui', 'Note'];
+  const head = getLang() === 'en' ? ['Date', 'Type', 'Category', 'Amount (€)', 'Who', 'Note'] : ['Date', 'Type', 'Catégorie', 'Montant (€)', 'Qui', 'Note'];
+  const sep = getLang() === 'en' ? ',' : ';';
   const rows = [...txs]
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
     .map((t) => {
-      const type = t.kind === 'expense' ? 'Dépense' : t.kind === 'income' ? 'Rentrée' : t.amount >= 0 ? 'Épargne (versement)' : 'Épargne (retrait)';
+      const type = t.kind === 'expense' ? L('Dépense', 'Expense') : t.kind === 'income' ? L('Rentrée', 'Extra income') : t.amount >= 0 ? L('Épargne (versement)', 'Savings (deposit)') : L('Épargne (retrait)', 'Savings (withdrawal)');
       const signed = t.kind === 'expense' ? -t.amount : t.amount;
-      return [frDate(t.date), type, categoryOf(settings, t).name, money(signed), settings.names[t.person - 1], t.note];
+      return [getLang() === 'en' ? t.date : frDate(t.date), type, categoryOf(settings, t).name, money(signed), settings.names[t.person - 1], t.note];
     });
-  return '﻿' + [head, ...rows].map((r) => r.map((v) => cell(String(v))).join(';')).join('\r\n') + '\r\n';
+  return '﻿' + [head, ...rows].map((r) => r.map((v) => cell(String(v), sep)).join(sep)).join('\r\n') + '\r\n';
 }
 
 export interface Backup {
@@ -38,10 +40,10 @@ export function parseBackup(text: string): { settings: Settings; txs: Tx[] } {
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new Error("Ce fichier n'est pas une sauvegarde Gecko Budget (.json).");
+    throw new Error(L("Ce fichier n'est pas une sauvegarde Gecko Budget (.json).", 'This file is not a Gecko Budget backup (.json).'));
   }
   const b = raw as Partial<Backup>;
-  if (!b || b.app !== 'gecko-budget' || !Array.isArray(b.transactions)) throw new Error("Ce fichier n'est pas une sauvegarde Gecko Budget.");
+  if (!b || b.app !== 'gecko-budget' || !Array.isArray(b.transactions)) throw new Error(L("Ce fichier n'est pas une sauvegarde Gecko Budget.", 'This file is not a Gecko Budget backup.'));
   const txs: Tx[] = b.transactions
     .filter((t) => t && typeof t.id === 'string' && ['expense', 'income', 'saving'].includes(t.kind) && Number.isFinite(t.amount) && /^\d{4}-\d{2}-\d{2}$/.test(t.date))
     .map((t) => ({

@@ -125,6 +125,7 @@ L'appli s'ouvre alors en plein écran, comme une vraie appli, avec l'icône du g
 - **Sans réseau** (métro, cave, campagne) : notez vos dépenses normalement. L'appli affiche « Hors connexion », garde tout sur le téléphone et l'envoie dès que le réseau revient.
 - **Changer un budget** : ⚙️ → modifiez le montant → **Enregistrer**. Le nouveau montant s'applique à partir du mois en cours, les mois passés ne changent pas.
 - **Thème clair ou sombre** : ⚙️ → **Apparence**. En mode « Auto », l'appli suit le réglage du téléphone.
+- **Langue (français / English)** : ⚙️ → **Langue · Language**, ou le lien en bas de l'écran de connexion. Chaque téléphone a sa propre langue ; par défaut, l'appli suit celle du téléphone.
 
 ---
 

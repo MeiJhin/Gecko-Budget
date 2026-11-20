@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { COLORS, ICON_GROUPS } from '../lib/defaults';
 import { Sheet } from './ui';
+import { L } from '../lib/i18n';
 
 export default function IconPicker({
   name,
@@ -20,7 +21,7 @@ export default function IconPicker({
   const [done, setDone] = useState(false);
   return (
     <Sheet
-      title="Choisir l'icône"
+      title={L("Choisir l'icône", 'Choose the icon')}
       onClose={onClose}
       z={1}
       closeSignal={done}
@@ -32,7 +33,7 @@ export default function IconPicker({
             setDone(true);
           }}
         >
-          C'est bon
+          {L("C'est bon", 'Done')}
         </button>
       }
     >
@@ -41,14 +42,14 @@ export default function IconPicker({
           {ic}
         </div>
         <div>
-          <div className="n">{name || 'Sans nom'}</div>
-          <div className="muted">Touchez une icône puis une couleur</div>
+          <div className="n">{name || L('Sans nom', 'Untitled')}</div>
+          <div className="muted">{L('Touchez une icône puis une couleur', 'Tap an icon, then a colour')}</div>
         </div>
       </div>
-      <span className="label">Couleur</span>
-      <div className="swatches" role="radiogroup" aria-label="Couleur">
+      <span className="label">{L('Couleur', 'Colour')}</span>
+      <div className="swatches" role="radiogroup" aria-label={L('Couleur', 'Colour')}>
         {COLORS.map((c) => (
-          <button key={c} role="radio" aria-checked={col === c} aria-label={`Couleur ${c}`} className={`swatch${col === c ? ' on' : ''}`} style={{ background: c }} onClick={() => setCol(c)} />
+          <button key={c} role="radio" aria-checked={col === c} aria-label={`${L('Couleur', 'Colour')} ${c}`} className={`swatch${col === c ? ' on' : ''}`} style={{ background: c }} onClick={() => setCol(c)} />
         ))}
       </div>
       {ICON_GROUPS.map((g) => (
@@ -56,7 +57,7 @@ export default function IconPicker({
           <h4>{g.title}</h4>
           <div className="ip-grid">
             {g.icons.map((x) => (
-              <button key={x} className={ic === x ? 'on' : ''} onClick={() => setIc(x)} aria-label={`Icône ${x}`} aria-pressed={ic === x}>
+              <button key={x} className={ic === x ? 'on' : ''} onClick={() => setIc(x)} aria-label={`${L('Icône', 'Icon')} ${x}`} aria-pressed={ic === x}>
                 {x}
               </button>
             ))}

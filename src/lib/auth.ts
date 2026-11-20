@@ -1,3 +1,4 @@
+import { L } from './i18n';
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
@@ -6,19 +7,19 @@ import type { Settings } from './types';
 /** Traduit les messages d'erreur de Supabase en français simple */
 export function frError(e: unknown): string {
   const m = String((e as { message?: string })?.message ?? e ?? '');
-  if (/invalid login credentials/i.test(m)) return 'E-mail ou mot de passe incorrect.';
-  if (/email not confirmed/i.test(m)) return "Confirmez d'abord votre adresse : cliquez sur le lien reçu par e-mail.";
-  if (/already registered|already been registered|user_already_exists/i.test(m)) return 'Un compte existe déjà avec cet e-mail : connectez-vous.';
-  if (/password should be at least|weak/i.test(m)) return 'Mot de passe trop court : 8 caractères minimum.';
-  if (/rate limit|too many|over_email_send_rate_limit/i.test(m)) return 'Trop de tentatives : réessayez dans quelques minutes.';
-  if (/invalid.*email|unable to validate email/i.test(m)) return "Cette adresse e-mail n'a pas l'air valide.";
-  if (/CODE_INCONNU/.test(m)) return 'Code inconnu : vérifiez les 6 caractères.';
-  if (/FOYER_COMPLET/.test(m)) return 'Ce foyer a déjà ses deux membres.';
-  if (/DEJA_DANS_UN_FOYER/.test(m)) return 'Ce compte fait déjà partie d’un autre foyer.';
-  if (/FOYER_NON_VIDE/.test(m)) return 'Votre foyer contient déjà des opérations : impossible de le quitter.';
-  if (/FOYER_PARTAGE/.test(m)) return 'Votre foyer est déjà partagé : impossible de le quitter.';
-  if (/fetch|network|load failed/i.test(m)) return 'Pas de connexion internet. Réessayez quand le réseau revient.';
-  return m || 'Une erreur est survenue.';
+  if (/invalid login credentials/i.test(m)) return L('E-mail ou mot de passe incorrect.', 'Wrong e-mail or password.');
+  if (/email not confirmed/i.test(m)) return L("Confirmez d'abord votre adresse : cliquez sur le lien reçu par e-mail.", 'Please confirm your address first: click the link in the e-mail you received.');
+  if (/already registered|already been registered|user_already_exists/i.test(m)) return L('Un compte existe déjà avec cet e-mail : connectez-vous.', 'An account already exists with this e-mail: please sign in.');
+  if (/password should be at least|weak/i.test(m)) return L('Mot de passe trop court : 8 caractères minimum.', 'Password too short: 8 characters minimum.');
+  if (/rate limit|too many|over_email_send_rate_limit/i.test(m)) return L('Trop de tentatives : réessayez dans quelques minutes.', 'Too many attempts: try again in a few minutes.');
+  if (/invalid.*email|unable to validate email/i.test(m)) return L("Cette adresse e-mail n'a pas l'air valide.", "This e-mail address doesn't look valid.");
+  if (/CODE_INCONNU/.test(m)) return L('Code inconnu : vérifiez les 6 caractères.', 'Unknown code: check the 6 characters.');
+  if (/FOYER_COMPLET/.test(m)) return L('Ce foyer a déjà ses deux membres.', 'This household already has its two members.');
+  if (/DEJA_DANS_UN_FOYER/.test(m)) return L('Ce compte fait déjà partie d’un autre foyer.', 'This account already belongs to another household.');
+  if (/FOYER_NON_VIDE/.test(m)) return L('Votre foyer contient déjà des opérations : impossible de le quitter.', 'Your household already has transactions: you can’t leave it.');
+  if (/FOYER_PARTAGE/.test(m)) return L('Votre foyer est déjà partagé : impossible de le quitter.', 'Your household is already shared: you can’t leave it.');
+  if (/fetch|network|load failed/i.test(m)) return L('Pas de connexion internet. Réessayez quand le réseau revient.', 'No internet connection. Try again when you’re back online.');
+  return m || L('Une erreur est survenue.', 'Something went wrong.');
 }
 
 export function useSession() {
@@ -41,7 +42,7 @@ export function useSession() {
 }
 
 const sb = () => {
-  if (!supabase) throw new Error('Supabase non configuré');
+  if (!supabase) throw new Error('Supabase not configured');
   return supabase;
 };
 const redirect = () => window.location.origin + window.location.pathname;

@@ -28,3 +28,14 @@ describe('export', () => {
     expect(() => parseBackup('pas du json')).toThrow(/sauvegarde/);
   });
 });
+
+import { setLang } from './i18n';
+describe('export en anglais', () => {
+  it('CSV au format anglais', () => {
+    setLang('en');
+    const lines = toCsv(defaultSettings(), txs).replace('﻿', '').trim().split('\r\n');
+    setLang('fr');
+    expect(lines[0]).toBe('Date,Type,Category,Amount (€),Who,Note');
+    expect(lines[2]).toBe('2026-11-18,Expense,Groceries,-128.30,Me,Leclerc; drive');
+  });
+});

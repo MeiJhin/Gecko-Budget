@@ -13,6 +13,7 @@ import Depenses from './screens/Depenses';
 import Epargne from './screens/Epargne';
 import Bilan from './screens/Bilan';
 import { AuthScreen, HouseholdScreen, NewPasswordScreen } from './screens/Auth';
+import { L, useLang } from './lib/i18n';
 
 export type Tab = 'suivi' | 'depenses' | 'epargne' | 'bilan';
 export interface DepFilter {
@@ -81,6 +82,8 @@ function useToday() {
 /* ---------- l'appli ---------- */
 
 export default function App() {
+  // la langue change → toute l'appli se redessine
+  useLang();
   return (
     <ToastProvider>
       <Gate />
@@ -134,7 +137,7 @@ function Gate() {
       <main className="auth">
         <div className="error-msg">{error}</div>
         <button className="btn" style={{ marginTop: 16 }} onClick={() => window.location.reload()}>
-          Réessayer
+          {L('Réessayer', 'Try again')}
         </button>
       </main>
     );
@@ -196,21 +199,21 @@ function Main({ email }: { email: string | null }) {
         <div className="brand">
           Gecko <span className="b2">Budget</span>
         </div>
-        <button className="round-btn" onClick={() => setSettingsOpen(true)} aria-label="Réglages">
+        <button className="round-btn" onClick={() => setSettingsOpen(true)} aria-label={L('Réglages', 'Settings')}>
           <Icon name="gear" />
         </button>
       </header>
 
-      <nav className="month-pill" aria-label="Mois affiché">
-        <button onClick={() => setMonth(addMonths(month, -1))} aria-label="Mois précédent">
+      <nav className="month-pill" aria-label={L('Mois affiché', 'Month shown')}>
+        <button onClick={() => setMonth(addMonths(month, -1))} aria-label={L('Mois précédent', 'Previous month')}>
           <Icon name="left" />
         </button>
         <span className="label">
-          <button onClick={() => setMonth(current)} title="Revenir au mois en cours">
+          <button onClick={() => setMonth(current)} title={L('Revenir au mois en cours', 'Back to the current month')}>
             {monthLabel(month)}
           </button>
         </span>
-        <button onClick={() => setMonth(addMonths(month, 1))} aria-label="Mois suivant">
+        <button onClick={() => setMonth(addMonths(month, 1))} aria-label={L('Mois suivant', 'Next month')}>
           <Icon name="right" />
         </button>
       </nav>
@@ -220,8 +223,11 @@ function Main({ email }: { email: string | null }) {
           {data.lastError
             ? `⚠️ ${data.lastError}`
             : !data.online
-              ? `📴 Hors connexion${data.pending ? ` · ${data.pending} opération${data.pending > 1 ? 's' : ''} en attente` : ''} — tout est gardé sur le téléphone`
-              : `⏳ Envoi de ${data.pending} opération${data.pending > 1 ? 's' : ''}…`}
+              ? L(
+                  `📴 Hors connexion${data.pending ? ` · ${data.pending} opération${data.pending > 1 ? 's' : ''} en attente` : ''} — tout est gardé sur le téléphone`,
+                  `📴 Offline${data.pending ? ` · ${data.pending} pending` : ''} — everything is kept on the phone`,
+                )
+              : L(`⏳ Envoi de ${data.pending} opération${data.pending > 1 ? 's' : ''}…`, `⏳ Sending ${data.pending} transaction${data.pending > 1 ? 's' : ''}…`)}
         </div>
       )}
 
@@ -232,21 +238,21 @@ function Main({ email }: { email: string | null }) {
         {tab === 'bilan' && <Bilan data={data} nav={nav} />}
       </main>
 
-      <nav className="nav" aria-label="Navigation">
+      <nav className="nav" aria-label={L('Navigation', 'Navigation')}>
         <button className={tab === 'suivi' ? 'on' : ''} onClick={() => go('suivi')} aria-current={tab === 'suivi' ? 'page' : undefined}>
-          Suivi
+          {L('Suivi', 'Home')}
         </button>
         <button className={tab === 'depenses' ? 'on' : ''} onClick={() => go('depenses', {})} aria-current={tab === 'depenses' ? 'page' : undefined}>
-          Dépenses
+          {L('Dépenses', 'Spending')}
         </button>
-        <button className="plus" onClick={() => setAdd({})} aria-label="Ajouter une opération">
+        <button className="plus" onClick={() => setAdd({})} aria-label={L('Ajouter une opération', 'Add a transaction')}>
           <Icon name="plus" stroke={2.6} />
         </button>
         <button className={tab === 'epargne' ? 'on' : ''} onClick={() => go('epargne')} aria-current={tab === 'epargne' ? 'page' : undefined}>
-          Épargne
+          {L('Épargne', 'Savings')}
         </button>
         <button className={tab === 'bilan' ? 'on' : ''} onClick={() => go('bilan')} aria-current={tab === 'bilan' ? 'page' : undefined}>
-          Bilan
+          {L('Bilan', 'Report')}
         </button>
       </nav>
 

@@ -1,3 +1,4 @@
+import { L } from './i18n';
 import type { BudgetVersion, Cents, Charge, DateKey, Envelope, MonthKey, Person, Pot, Settings, Tx, Visual } from './types';
 import { addMonths, daysInMonth, monthOf, parseMonth } from './format';
 import { INCOME_TYPES } from './defaults';
@@ -85,7 +86,7 @@ export interface EnvelopeLine {
   ratio: number;
 }
 
-const UNKNOWN = (id: string): Envelope => ({ id, name: 'Enveloppe supprimée', icon: '📦', color: '#BFC5D2', archived: true });
+const UNKNOWN = (id: string): Envelope => ({ id, name: L('Enveloppe supprimée', 'Deleted envelope'), icon: '📦', color: '#BFC5D2', archived: true });
 
 export function envelopeById(s: Settings, id: string): Envelope {
   return s.envelopes.find((e) => e.id === id) ?? UNKNOWN(id);
@@ -285,7 +286,7 @@ export function chargeLines(s: Settings, month: MonthKey, today: DateKey): { lin
   const clock = monthClock(month, today);
   const totalC = sum(Object.values(v.charges));
   const lines: ChargeLine[] = Object.entries(v.charges).map(([id, amount]) => {
-    const charge: Charge = s.charges.find((c) => c.id === id) ?? { id, name: 'Charge supprimée', icon: '🧾', color: '#BFC5D2', iconAuto: false, day: null, archived: true };
+    const charge: Charge = s.charges.find((c) => c.id === id) ?? { id, name: L('Charge supprimée', 'Deleted bill'), icon: '🧾', color: '#BFC5D2', iconAuto: false, day: null, archived: true };
     const effDay = charge.day ? Math.min(charge.day, clock.days) : null;
     let state: ChargeState;
     if (effDay == null) state = { kind: 'free' };
@@ -332,7 +333,7 @@ export function nextCharge(s: Settings, today: DateKey): { charge: Charge; amoun
 export function categoryOf(s: Settings, t: Pick<Tx, 'kind' | 'category'>): Visual {
   if (t.kind === 'expense') return envelopeById(s, t.category);
   if (t.kind === 'income') return INCOME_TYPES.find((i) => i.id === t.category) ?? INCOME_TYPES[INCOME_TYPES.length - 1];
-  return s.pots.find((p) => p.id === t.category) ?? { id: t.category, name: 'Cagnotte supprimée', icon: '🐷', color: '#FDD46B' };
+  return s.pots.find((p) => p.id === t.category) ?? { id: t.category, name: L('Cagnotte supprimée', 'Deleted pot'), icon: '🐷', color: '#FDD46B' };
 }
 
 export const yearOf = (m: MonthKey) => parseMonth(m).y;

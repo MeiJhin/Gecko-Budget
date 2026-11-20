@@ -141,6 +141,22 @@ check((await page.locator('.savecard').innerText()).includes(`versé en épargne
 await page.getByRole('tab', { name: 'Charges fixes' }).click();
 check((await page.getByText('le 5 du mois').count()) === 1 && (await page.getByText('✓ Prélevé').count()) === 1, 'charge du 5 marquée Prélevé le 20');
 
+// --- anglais
+await page.getByLabel('Réglages').click();
+await sheet.getByRole('button', { name: '🇬🇧 English' }).click();
+check((await sheet.locator('h2').innerText()) === 'Our budget', 'réglages traduits en anglais');
+await sheet.getByLabel('Close').click();
+await closed();
+check((await page.locator('.nav').innerText()).includes('Spending'), 'barre de navigation en anglais');
+await page.getByRole('tab', { name: 'Report' }).click();
+check((await page.locator('.savecard .v').innerText()) === '€2,595', 'montants au format anglais : €2,595');
+await page.reload();
+check((await page.locator('.nav').innerText()).includes('Report'), 'la langue est retenue après rechargement');
+await page.getByLabel('Settings').click();
+await sheet.getByRole('button', { name: '🇫🇷 Français' }).click();
+await sheet.getByLabel('Fermer').click();
+await closed();
+
 // --- persistance
 await page.reload();
 await nav('Bilan');

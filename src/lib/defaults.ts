@@ -1,5 +1,6 @@
 import type { Envelope, Pot, Settings, Visual } from './types';
 import { todayKey, monthOf } from './format';
+import { L } from './i18n';
 
 /** Les 10 couleurs pastel du sélecteur */
 export const COLORS = [
@@ -17,25 +18,25 @@ export const COLORS = [
 
 export const PERSON_COLORS: Record<1 | 2, string> = { 1: '#4F6BED', 2: '#E05A7A' };
 
-export const ICON_GROUPS: { title: string; icons: string[] }[] = [
-  { title: 'Courses & repas', icons: ['🛒', '🥖', '🍎', '🥩', '🧀', '🍽️', '🍕', '🍔', '🍣', '☕', '🍷', '🍺'] },
-  { title: 'Maison & énergie', icons: ['🏠', '🔑', '💡', '🔥', '💧', '🛋️', '🧹', '🔧', '🪴', '🧺', '🛠️', '🏡'] },
-  { title: 'Transport', icons: ['⛽', '🚗', '🚙', '🚐', '🚆', '🛵', '🚲', '✈️', '🅿️', '🔋', '🛞', '🚕'] },
-  { title: 'Loisirs & sorties', icons: ['🎮', '🎬', '🎵', '📚', '⚽', '🏋️', '🎨', '🎟️', '🏖️', '🎉', '🎲', '🍿'] },
-  { title: 'Santé & perso', icons: ['💊', '🩺', '🦷', '👓', '💇', '💅', '🧴', '👕', '👟', '👜', '🧘', '💄'] },
-  { title: 'Famille & animaux', icons: ['👶', '🧸', '🎒', '🍼', '🐶', '🐱', '🎁', '💍', '🎂', '👪', '🏫', '❤️'] },
-  { title: 'Abonnements & finances', icons: ['📱', '🌐', '📺', '🎧', '☁️', '🛡️', '🏦', '💳', '💶', '📈', '🧾', '🏛️', '🎓', '💼', '📦', '🐷', '🛟', '🎯'] },
+export const ICON_GROUPS: { readonly title: string; icons: string[] }[] = [
+  { get title() { return L('Courses & repas', 'Food & groceries'); }, icons: ['🛒', '🥖', '🍎', '🥩', '🧀', '🍽️', '🍕', '🍔', '🍣', '☕', '🍷', '🍺'] },
+  { get title() { return L('Maison & énergie', 'Home & energy'); }, icons: ['🏠', '🔑', '💡', '🔥', '💧', '🛋️', '🧹', '🔧', '🪴', '🧺', '🛠️', '🏡'] },
+  { get title() { return L('Transport', 'Transport'); }, icons: ['⛽', '🚗', '🚙', '🚐', '🚆', '🛵', '🚲', '✈️', '🅿️', '🔋', '🛞', '🚕'] },
+  { get title() { return L('Loisirs & sorties', 'Leisure & outings'); }, icons: ['🎮', '🎬', '🎵', '📚', '⚽', '🏋️', '🎨', '🎟️', '🏖️', '🎉', '🎲', '🍿'] },
+  { get title() { return L('Santé & perso', 'Health & personal'); }, icons: ['💊', '🩺', '🦷', '👓', '💇', '💅', '🧴', '👕', '👟', '👜', '🧘', '💄'] },
+  { get title() { return L('Famille & animaux', 'Family & pets'); }, icons: ['👶', '🧸', '🎒', '🍼', '🐶', '🐱', '🎁', '💍', '🎂', '👪', '🏫', '❤️'] },
+  { get title() { return L('Abonnements & finances', 'Subscriptions & finance'); }, icons: ['📱', '🌐', '📺', '🎧', '☁️', '🛡️', '🏦', '💳', '💶', '📈', '🧾', '🏛️', '🎓', '💼', '📦', '🐷', '🛟', '🎯'] },
 ];
 
 /** Types de rentrées ponctuelles (fixes) */
 export const INCOME_TYPES: Visual[] = [
-  { id: 'prime', name: 'Prime/bonus', icon: '💼', color: '#7DD3AE' },
-  { id: 'vente', name: 'Vente Vinted/Leboncoin', icon: '🏷️', color: '#7DD6E8' },
-  { id: 'rembours', name: 'Remboursement', icon: '💸', color: '#C5E17A' },
-  { id: 'cadeau', name: 'Cadeau', icon: '🎁', color: '#F4A6C8' },
-  { id: 'aide', name: 'Aide/CAF', icon: '🏛️', color: '#8AB4F8' },
-  { id: 'heures', name: 'Heures sup/extra', icon: '⏱️', color: '#FDD46B' },
-  { id: 'autre', name: 'Autre', icon: '✨', color: '#C9A7F9' },
+  { id: 'prime', get name() { return L('Prime/bonus', 'Bonus'); }, icon: '💼', color: '#7DD3AE' },
+  { id: 'vente', get name() { return L('Vente Vinted/Leboncoin', 'Resale (Vinted, eBay…)'); }, icon: '🏷️', color: '#7DD6E8' },
+  { id: 'rembours', get name() { return L('Remboursement', 'Refund'); }, icon: '💸', color: '#C5E17A' },
+  { id: 'cadeau', get name() { return L('Cadeau', 'Gift'); }, icon: '🎁', color: '#F4A6C8' },
+  { id: 'aide', get name() { return L('Aide/CAF', 'Benefits'); }, icon: '🏛️', color: '#8AB4F8' },
+  { id: 'heures', get name() { return L('Heures sup/extra', 'Overtime/extra work'); }, icon: '⏱️', color: '#FDD46B' },
+  { id: 'autre', get name() { return L('Autre', 'Other'); }, icon: '✨', color: '#C9A7F9' },
 ];
 
 const norm = (s: string) =>
@@ -46,29 +47,29 @@ const norm = (s: string) =>
 
 /** Mots-clés → icône pour les charges fixes (ordre = priorité) */
 const GUESSES: [RegExp, string][] = [
-  [/loyer|appart|logement/, '🏠'],
-  [/credit|pret|emprunt|immo/, '🏦'],
-  [/mutuelle|sante/, '🩺'],
-  [/assurance|assu\b|maif|macif|matmut|axa|gmf/, '🛡️'],
-  [/edf|electri|engie|totalenergies|enercoop/, '💡'],
-  [/gaz|chauffage|fioul/, '🔥'],
-  [/\beau\b|veolia|saur/, '💧'],
+  [/loyer|appart|logement|\brent\b|mortgage/, '🏠'],
+  [/credit|pret|emprunt|immo|loan/, '🏦'],
+  [/mutuelle|sante|health/, '🩺'],
+  [/assurance|assu\b|maif|macif|matmut|axa|gmf|insurance/, '🛡️'],
+  [/edf|electri|engie|totalenergies|enercoop|power/, '💡'],
+  [/gaz|chauffage|fioul|\bgas\b|heating/, '🔥'],
+  [/\beau\b|veolia|saur|water/, '💧'],
   [/box|internet|fibre|livebox|freebox|bbox|adsl/, '🌐'],
-  [/forfait|mobile|telephone|portable|sosh|free mobile|bouygues|sfr|orange/, '📱'],
+  [/forfait|mobile|telephone|portable|sosh|free mobile|bouygues|sfr|orange|phone/, '📱'],
   [/netflix|canal|disney|prime video|molotov|\btv\b|television|ocs|max\b/, '📺'],
   [/spotify|deezer|musique|apple music/, '🎧'],
-  [/impot|taxe|tresor/, '🏛️'],
-  [/creche|nounou|garde|assistante mat|baby/, '👶'],
-  [/cantine|ecole|scolar|etude/, '🏫'],
+  [/impot|taxe|tresor|\btax/, '🏛️'],
+  [/creche|nounou|garde|assistante mat|baby|daycare|nursery|childcare/, '👶'],
+  [/cantine|ecole|scolar|etude|school/, '🏫'],
   [/sport|salle|gym|fitness|basic fit|club/, '🏋️'],
   [/icloud|cloud|google one|drive|dropbox/, '☁️'],
-  [/voiture|auto|leasing|lld|loa/, '🚗'],
+  [/voiture|auto|leasing|lld|loa|\bcar\b/, '🚗'],
   [/navigo|transport|train|sncf|bus|metro|tcl|pass/, '🚆'],
   [/parking/, '🅿️'],
-  [/epargne|livret|placement/, '🐷'],
-  [/banque|frais bancaire|carte/, '💳'],
-  [/chien|chat|veto|animal/, '🐶'],
-  [/menage|aide a domicile/, '🧹'],
+  [/epargne|livret|placement|saving/, '🐷'],
+  [/banque|frais bancaire|carte|bank/, '💳'],
+  [/chien|chat|veto|animal|\bdog|\bcat\b|\bvet\b|\bpet/, '🐶'],
+  [/menage|aide a domicile|cleaning/, '🧹'],
   [/jeu|playstation|xbox|nintendo|steam/, '🎮'],
   [/presse|journal|magazine|abonnement/, '🧾'],
 ];
@@ -87,22 +88,23 @@ export const uid = (): string =>
         return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
       });
 
-export const DEFAULT_ENVELOPES: Omit<Envelope, 'id'>[] = [
-  { name: 'Courses', icon: '🛒', color: COLORS[0] },
-  { name: 'Restos & sorties', icon: '🍽️', color: COLORS[1] },
-  { name: 'Essence & transport', icon: '⛽', color: COLORS[2] },
-  { name: 'Maison', icon: '🏠', color: COLORS[3] },
-  { name: 'Loisirs', icon: '🎮', color: COLORS[4] },
-  { name: 'Santé', icon: '💊', color: COLORS[5] },
-  { name: 'Vêtements & shopping', icon: '👕', color: COLORS[6] },
-  { name: 'Divers', icon: '📦', color: COLORS[8] },
+/** Enveloppes par défaut, dans la langue de la personne qui crée le foyer */
+export const defaultEnvelopes = (): Omit<Envelope, 'id'>[] => [
+  { name: L('Courses', 'Groceries'), icon: '🛒', color: COLORS[0] },
+  { name: L('Restos & sorties', 'Restaurants & outings'), icon: '🍽️', color: COLORS[1] },
+  { name: L('Essence & transport', 'Fuel & transport'), icon: '⛽', color: COLORS[2] },
+  { name: L('Maison', 'Home'), icon: '🏠', color: COLORS[3] },
+  { name: L('Loisirs', 'Leisure'), icon: '🎮', color: COLORS[4] },
+  { name: L('Santé', 'Health'), icon: '💊', color: COLORS[5] },
+  { name: L('Vêtements & shopping', 'Clothes & shopping'), icon: '👕', color: COLORS[6] },
+  { name: L('Divers', 'Misc.'), icon: '📦', color: COLORS[8] },
 ];
 
 export function defaultSettings(): Settings {
-  const envelopes: Envelope[] = DEFAULT_ENVELOPES.map((e, i) => ({ ...e, id: `env-${i + 1}` }));
-  const pots: Pot[] = [{ id: 'pot-1', name: 'Livret A', icon: '🐷', color: COLORS[7], goal: null, initial: 0 }];
+  const envelopes: Envelope[] = defaultEnvelopes().map((e, i) => ({ ...e, id: `env-${i + 1}` }));
+  const pots: Pot[] = [{ id: 'pot-1', name: L('Livret A', 'Savings account'), icon: '🐷', color: COLORS[7], goal: null, initial: 0 }];
   return {
-    names: ['Moi', 'Ma femme'],
+    names: [L('Moi', 'Me'), L('Ma femme', 'My partner')],
     envelopes,
     charges: [],
     pots,

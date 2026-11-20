@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react';
 import type { Cents } from '../lib/types';
 import type { MonthBar, Status } from '../lib/calc';
 import { euros, monthName, monthShort } from '../lib/format';
+import { L } from '../lib/i18n';
 
 /** Vrai au premier rendu puis faux : sert à animer le remplissage des jauges */
 function useMounted() {
@@ -27,7 +28,7 @@ export function Ring({ ratio, pace, status, size = 140, showPace = true }: { rat
   const px = size / 2 + r * Math.cos(a);
   const py = size / 2 + r * Math.sin(a);
   return (
-    <div className="ring" style={{ width: size, height: size }} role="img" aria-label={`${Math.round(ratio * 100)} % dépensé, on devrait en être à ${Math.round(pace * 100)} %`}>
+    <div className="ring" style={{ width: size, height: size }} role="img" aria-label={L(`${Math.round(ratio * 100)} % dépensé, on devrait en être à ${Math.round(pace * 100)} %`, `${Math.round(ratio * 100)}% spent, we should be at ${Math.round(pace * 100)}%`)}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth={stroke} />
         <circle
@@ -49,7 +50,7 @@ export function Ring({ ratio, pace, status, size = 140, showPace = true }: { rat
       <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
         <div>
           <div className="pct num">{Math.round(ratio * 100)}%</div>
-          <div className="lbl">dépensé</div>
+          <div className="lbl">{L('dépensé', 'spent')}</div>
         </div>
       </div>
     </div>
@@ -69,13 +70,13 @@ export function DailyBars({ daily, dailyBudget, today, label }: { daily: Cents[]
   const max = Math.max(...daily, dailyBudget * 1.5, 1);
   const y = (v: number) => H - (v / max) * (H - top);
   const by = y(dailyBudget);
-  const tip = sel != null ? `${label(sel + 1)} : ${euros(daily[sel], { decimals: true })}` : ' ';
+  const tip = sel != null ? `${label(sel + 1)}${L(' : ', ': ')}${euros(daily[sel], { decimals: true })}` : ' ';
   return (
     <div>
       <div className="chart-tip num" aria-live="polite">
         {tip}
       </div>
-      <svg viewBox={`0 0 ${W} ${H + 4}`} width="100%" role="img" aria-label="Dépenses par jour du mois">
+      <svg viewBox={`0 0 ${W} ${H + 4}`} width="100%" role="img" aria-label={L('Dépenses par jour du mois', 'Spending per day this month')}>
         {daily.map((v, i) => {
           const x = i * slot + (slot - bw) / 2;
           const future = today > 0 && i + 1 > today;
@@ -113,13 +114,13 @@ export function DailyBars({ daily, dailyBudget, today, label }: { daily: Cents[]
       </svg>
       <div className="chart-legend">
         <span>
-          <i style={{ background: 'var(--bar-under)' }} /> sous la moyenne prévue
+          <i style={{ background: 'var(--bar-under)' }} /> {L('sous la moyenne prévue', 'under the daily plan')}
         </span>
         <span>
-          <i style={{ background: 'var(--peach)' }} /> au-dessus
+          <i style={{ background: 'var(--peach)' }} /> {L('au-dessus', 'above')}
         </span>
         <span>
-          <i className="dash" style={{ width: 16 }} /> budget par jour
+          <i className="dash" style={{ width: 16 }} /> {L('budget par jour', 'daily budget')}
         </span>
       </div>
     </div>
@@ -143,9 +144,9 @@ export function MonthBars({ bars }: { bars: MonthBar[] }) {
   return (
     <div>
       <div className="chart-tip num" aria-live="polite">
-        {s ? `${monthName(s.month)} : ${euros(s.spent)} dépensés sur ${euros(s.budget)}` : ' '}
+        {s ? L(`${monthName(s.month)} : ${euros(s.spent)} dépensés sur ${euros(s.budget)}`, `${monthName(s.month)}: ${euros(s.spent)} spent of ${euros(s.budget)}`) : ' '}
       </div>
-      <svg viewBox={`0 0 ${W} ${H + 22}`} width="100%" role="img" aria-label="Dépenses du quotidien par mois">
+      <svg viewBox={`0 0 ${W} ${H + 22}`} width="100%" role="img" aria-label={L('Dépenses du quotidien par mois', 'Everyday spending per month')}>
         <defs>
           <pattern id={`h${pid}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect width="6" height="6" fill="var(--c)" opacity="0.35" />
@@ -172,16 +173,16 @@ export function MonthBars({ bars }: { bars: MonthBar[] }) {
       </svg>
       <div className="chart-legend">
         <span>
-          <i style={{ background: 'var(--bar-under)' }} /> sous le budget
+          <i style={{ background: 'var(--bar-under)' }} /> {L('sous le budget', 'under budget')}
         </span>
         <span>
-          <i style={{ background: 'var(--peach)' }} /> au-dessus
+          <i style={{ background: 'var(--peach)' }} /> {L('au-dessus', 'over')}
         </span>
         <span>
-          <i className="hatch" /> mois en cours
+          <i className="hatch" /> {L('mois en cours', 'current month')}
         </span>
         <span>
-          <i className="dash" style={{ width: 16 }} /> budget du mois
+          <i className="dash" style={{ width: 16 }} /> {L('budget du mois', 'monthly budget')}
         </span>
       </div>
     </div>
@@ -199,7 +200,7 @@ export function Donut({ parts, total, size = 160 }: { parts: { id: string; value
   const gap = parts.length > 1 ? 2.5 : 0;
   let acc = 0;
   return (
-    <div style={{ position: 'relative', width: size, height: size, flex: 'none' }} role="img" aria-label={`Répartition des dépenses : ${euros(total)} au total`}>
+    <div style={{ position: 'relative', width: size, height: size, flex: 'none' }} role="img" aria-label={L(`Répartition des dépenses : ${euros(total)} au total`, `Spending breakdown: ${euros(total)} in total`)}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--track)" strokeWidth={stroke} />
         {parts.map((p) => {
@@ -231,7 +232,7 @@ export function Donut({ parts, total, size = 160 }: { parts: { id: string; value
           <div className="t num" style={{ fontWeight: 800, fontSize: size > 150 ? 24 : 20 }}>
             {euros(total)}
           </div>
-          <div className="small muted">dépensés</div>
+          <div className="small muted">{L('dépensés', 'spent')}</div>
         </div>
       </div>
     </div>
@@ -257,7 +258,7 @@ export function GoldArea({ points, firstLabel, lastLabel }: { points: Cents[]; f
   const last = points.length - 1;
   return (
     <div style={{ position: 'relative', zIndex: 1 }}>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Évolution du total épargné sur 6 mois">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={L('Évolution du total épargné sur 6 mois', 'Total savings over 6 months')}>
         <defs>
           <linearGradient id={`g${gid}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#F6C453" stopOpacity="0.45" />

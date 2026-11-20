@@ -4,6 +4,7 @@ import type { Kind, Person, Settings, Tx } from '../lib/types';
 import { PERSON_COLORS } from '../lib/defaults';
 import { categoryOf } from '../lib/calc';
 import { dayLabel, euros, shortDate } from '../lib/format';
+import { L } from '../lib/i18n';
 
 /* ---------- icônes au trait ---------- */
 
@@ -113,7 +114,7 @@ export function Sheet({
         {title !== undefined && (
           <div className="sheet-head">
             <h2>{title}</h2>
-            <button className="sheet-close" onClick={close} aria-label="Fermer">
+            <button className="sheet-close" onClick={close} aria-label={L('Fermer', 'Close')}>
               <Icon name="close" />
             </button>
           </div>
@@ -153,7 +154,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 /* ---------- liste d'opérations groupées par jour ---------- */
 
-export const STATUS_LABEL = { ok: 'OK', warn: 'Attention', over: 'Dépassé' } as const;
+export const STATUS_LABEL = () => ({ ok: 'OK', warn: L('Attention', 'Careful'), over: L('Dépassé', 'Over') }) as const;
 
 export function signed(t: Pick<Tx, 'kind' | 'amount'>): number {
   return t.kind === 'expense' ? -t.amount : t.amount;
@@ -166,7 +167,7 @@ export function TxRow({ t, settings, onOpen, today, showDate }: { t: Tx; setting
   let meta = t.note ? cat.name : '';
   if (t.kind === 'saving') {
     // versement : « Versement » ; retrait : sa raison (obligatoire)
-    title = t.amount >= 0 ? 'Versement' : `Retrait${t.note ? ` : ${t.note}` : ''}`;
+    title = t.amount >= 0 ? L('Versement', 'Deposit') : `${L('Retrait', 'Withdrawal')}${t.note ? `${L(' : ', ': ')}${t.note}` : ''}`;
     meta = [cat.name, t.amount >= 0 ? t.note : ''].filter(Boolean).join(' · ');
   }
   if (showDate) meta = [meta, shortDate(t.date)].filter(Boolean).join(' · ');

@@ -5,7 +5,7 @@ Une appli de budget pour notre couple : on note chaque dépense en quelques seco
 <p align="center"><img src="assets/gecko-budget-icon.svg" width="120" alt="Icône Gecko Budget"></p>
 
 - **Installation et mise en ligne** : suivez le [guide pas à pas](GUIDE.md).
-- Appli web installable sur iPhone et Android (PWA), en français, avec un thème clair et un thème sombre.
+- Appli web installable sur iPhone et Android (PWA), en français ou en anglais (au choix sur chaque téléphone), avec un thème clair et un thème sombre.
 - Données partagées en temps réel entre les deux téléphones grâce à Supabase, protégées par des règles RLS (un seul foyer, 2 comptes au maximum).
 - La saisie fonctionne hors connexion : les opérations sont envoyées dès que le réseau revient.
 

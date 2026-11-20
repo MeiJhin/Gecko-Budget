@@ -1,50 +1,43 @@
-"""Génère toutes les icônes de Gecko Budget à partir de assets/gecko-budget-icon-512.png.
-Lancer : python3 scripts/make-icons.py  (nécessite Pillow et numpy)"""
+"""Génère toutes les icônes de Gecko Budget à partir du fichier SVG fourni.
+Lancer d'abord : node scripts/render-svg.cjs  (SVG → PNG 1024 px)
+puis          : python3 scripts/make-icons.py  (nécessite Pillow)"""
 from pathlib import Path
-import numpy as np
+import shutil
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = Image.open(ROOT / "assets/gecko-budget-icon-512.png").convert("RGBA")
+R = ROOT / "assets/rendered"
+SRC = Image.open(R / "icon-1024.png").convert("RGBA")       # coins arrondis transparents
+FULL = Image.open(R / "full-1024.png").convert("RGB")       # carré plein
+MASK = Image.open(R / "maskable-1024.png").convert("RGB")   # carré plein + marge de sécurité
 OUT = ROOT / "public/icons"
 SPLASH = ROOT / "public/splash"
 OUT.mkdir(parents=True, exist_ok=True)
 SPLASH.mkdir(parents=True, exist_ok=True)
 
-# Carré plein (sans coins arrondis transparents) : on retire la marge des coins.
-INSET = 36
-full = SRC.crop((INSET, INSET, 512 - INSET, 512 - INSET)).convert("RGB")
+def sized(img, s):
+    return img.resize((s, s), Image.LANCZOS)
 
-
-def padded(img: Image.Image, size: int, scale: float) -> Image.Image:
-    """Réduit l'image et prolonge ses bords pour remplir tout le carré (dégradé continu)."""
-    inner = round(size * scale)
-    small = np.asarray(img.resize((inner, inner), Image.LANCZOS))
-    pad = (size - inner) // 2
-    rest = size - inner - pad
-    arr = np.pad(small, ((pad, rest), (pad, rest), (0, 0)), mode="edge")
-    return Image.fromarray(arr)
-
-
-# Icônes classiques (coins arrondis transparents, comme le fichier fourni)
+# Icônes classiques (coins arrondis, comme le SVG)
 for s in (512, 192):
-    SRC.resize((s, s), Image.LANCZOS).save(OUT / f"icon-{s}.png", optimize=True)
+    sized(SRC, s).save(OUT / f"icon-{s}.png", optimize=True)
 
-# Icône « maskable » : le gecko reste dans la zone de sécurité (cercle de 80 %)
+# Icônes « maskable » (Android découpe en rond, en goutte… : le gecko reste visible)
 for s in (512, 192):
-    padded(full, s, 0.76).save(OUT / f"maskable-{s}.png", optimize=True)
+    sized(MASK, s).save(OUT / f"maskable-{s}.png", optimize=True)
 
 # iPhone : carré plein, iOS arrondit lui-même les coins
-padded(full, 180, 0.94).save(OUT / "apple-touch-icon.png", optimize=True)
-padded(full, 180, 0.94).save(ROOT / "public/apple-touch-icon.png", optimize=True)
+sized(FULL, 180).save(OUT / "apple-touch-icon.png", optimize=True)
+sized(FULL, 180).save(ROOT / "public/apple-touch-icon.png", optimize=True)
 
-# Favicons
+# Favicons (le SVG lui-même pour les navigateurs récents)
+shutil.copy(ROOT / "assets/gecko-budget-icon.svg", ROOT / "public/favicon.svg")
 for s in (16, 32, 48, 64):
-    SRC.resize((s, s), Image.LANCZOS).save(OUT / f"favicon-{s}.png", optimize=True)
-SRC.save(ROOT / "public/favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+    sized(SRC, s).save(OUT / f"favicon-{s}.png", optimize=True)
+sized(SRC, 256).save(ROOT / "public/favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
 
 # Logo de l'en-tête (affiché en 40 px, fichier en 128 px pour les écrans nets)
-SRC.resize((128, 128), Image.LANCZOS).save(OUT / "logo-128.png", optimize=True)
+sized(SRC, 128).save(OUT / "logo-128.png", optimize=True)
 
 # Écrans de démarrage iPhone (fond #F2F1EE / sombre, logo au centre + nom)
 BG_LIGHT = (242, 241, 238)
@@ -68,7 +61,7 @@ for w, h, r in DEVICES:
     for mode, bg, fg in (("light", BG_LIGHT, (14, 47, 51)), ("dark", BG_DARK, (243, 244, 246))):
         img = Image.new("RGB", (W, H), bg)
         logo_s = int(W * 0.30)
-        logo = SRC.resize((logo_s, logo_s), Image.LANCZOS)
+        logo = sized(SRC, logo_s)
         y = int(H * 0.42 - logo_s / 2)
         img.paste(logo, ((W - logo_s) // 2, y), logo)
         if FONT:

@@ -11,6 +11,11 @@ export function frError(e: unknown): string {
   if (/email not confirmed/i.test(m)) return L("Confirmez d'abord votre adresse : cliquez sur le lien reçu par e-mail.", 'Please confirm your address first: click the link in the e-mail you received.');
   if (/already registered|already been registered|user_already_exists/i.test(m)) return L('Un compte existe déjà avec cet e-mail : connectez-vous.', 'An account already exists with this e-mail: please sign in.');
   if (/password should be at least|weak/i.test(m)) return L('Mot de passe trop court : 8 caractères minimum.', 'Password too short: 8 characters minimum.');
+  if (/email rate limit|over_email_send_rate_limit|error sending/i.test(m))
+    return L(
+      "Le service d'e-mails gratuit est saturé pour l'instant. Réessayez dans une heure, ou demandez à la personne qui gère l'appli de désactiver la confirmation par e-mail.",
+      'The free e-mail service is saturated right now. Try again in an hour, or ask the person who runs the app to turn off e-mail confirmation.',
+    );
   if (/rate limit|too many|over_email_send_rate_limit/i.test(m)) return L('Trop de tentatives : réessayez dans quelques minutes.', 'Too many attempts: try again in a few minutes.');
   if (/invalid.*email|unable to validate email/i.test(m)) return L("Cette adresse e-mail n'a pas l'air valide.", "This e-mail address doesn't look valid.");
   if (/CODE_INCONNU/.test(m)) return L('Code inconnu : vérifiez les 6 caractères.', 'Unknown code: check the 6 characters.');
